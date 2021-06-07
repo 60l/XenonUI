@@ -1,0 +1,105 @@
+-- // variables
+local library = {}
+local pages = {}
+local sections = {}
+--
+local utility = {}
+--
+local cre = game:GetService("CoreGui")
+-- // indexes
+library.__index = library
+-- // functions
+utility.new = function(instance,properties) 
+	-- // instance
+	local ins = Instance.new(instance)
+	-- // properties setting
+	for property,value in pairs(properties) do
+		ins[property] = value
+	end
+	-- // return
+	return ins
+end
+-- // main
+function library:new(props)
+	-- // properties
+	local name = props.name or props.Name or props.UiName or props.Uiname or props.uiName or props.username or props.Username or props.UserName or props.userName or "new ui"
+	-- // variables
+	local window = {}
+	-- // main
+	local screen = utility.new(
+		"ScreenGui",
+		{
+			Name = name,
+			ZIndexBehavior = "Sibling",
+			Parent = cre
+		}
+	)	
+	-- 1
+	local mainframe = utility.new(
+		"Frame",
+		{
+			BackgroundTransparency = 1,
+			Size = UDim2.new(0,525,0,400),
+			Position = UDim2.new(0.092,0,0.21,0),
+			Parent = screen
+		}
+	)
+	-- 2
+	local main = utility.new(
+		"Frame",
+		{
+			AnchorPoint = Vector2.new(0, 1),
+			BackgroundColor3 = Color3.fromRGB(5,3,6),
+			BorderColor3 = Color3.fromRGB(0,0,0),
+			BorderSizePixel = 0,
+			Size = UDim2.new(1,0,0.96,0),
+			Position = UDim2.new(0,0,1,0),
+			Parent = mainframe
+		}
+	)
+	--
+	local top = utility.new(
+		"Frame",
+		{
+			BackgroundColor3 = Color3.fromRGB(5,3,6),
+			BorderColor3 = Color3.fromRGB(0,0,0),
+			BorderSizePixel = 0,
+			Size = UDim2.new(1,0,0.04,0),
+			Position = UDim2.new(0,0,0,0),
+			Parent = mainframe
+		}
+	)
+	-- 3
+	local holder = utility.new(
+		"Frame",
+		{
+			AnchorPoint = Vector2.new(0.5,0.5),
+			BackgroundColor3 = Color3.fromRGB(13,9,14),
+			BorderColor3 = Color3.fromRGB(0,0,0),
+			BorderSizePixel = 0,
+			Size = UDim2.new(1,-10,1,-10),
+			Position = UDim2.new(0.5,0,0.5,0),
+			Parent = main
+		}
+	)
+	--
+	local title = utility.new(
+		"TextLabel",
+		{
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1,0,0.7,0),
+			Position = UDim2.new(0,0,0.2,0),
+			Font = "RobotoMono",
+			Text = name,
+			TextColor3 = Color3.fromRGB(0,167,255),
+			TextSize = 14,
+			TextStrokeTransparency = 0.5,
+			Parent = top
+		}
+	)
+	-- // metatable indexing + return
+	setmetatable(window, library)
+	return window
+end
+-- // init
+library:new({name = "Xenon"})
