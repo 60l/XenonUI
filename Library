@@ -6,8 +6,11 @@ local sections = {}
 local utility = {}
 --
 local cre = game:GetService("CoreGui")
+local ts = game:GetService("TweenService") 
 -- // indexes
 library.__index = library
+pages.__index = pages
+sections.__index = sections
 -- // functions
 utility.new = function(instance,properties) 
 	-- // instance
@@ -23,13 +26,14 @@ end
 function library:new(props)
 	-- // properties
 	local name = props.name or props.Name or props.UiName or props.Uiname or props.uiName or props.username or props.Username or props.UserName or props.userName or "new ui"
+	local color = props.color or props.Color or props.mainColor or props.maincolor or props.MainColor or props.Maincolor or props.Accent or props.accent or Color3.fromRGB(0,167,255)
 	-- // variables
 	local window = {}
 	-- // main
 	local screen = utility.new(
 		"ScreenGui",
 		{
-			Name = name,
+			Name = tostring(math.random(0,999999))..tostring(math.random(0,999999)),
 			ZIndexBehavior = "Sibling",
 			Parent = cre
 		}
@@ -91,15 +95,264 @@ function library:new(props)
 			Position = UDim2.new(0,0,0.2,0),
 			Font = "RobotoMono",
 			Text = name,
-			TextColor3 = Color3.fromRGB(0,167,255),
+			TextColor3 = color,
 			TextSize = 14,
 			TextStrokeTransparency = 0.5,
 			Parent = top
 		}
 	)
+	-- 4
+	local tabs = utility.new(
+		"Frame",
+		{
+			AnchorPoint = Vector2.new(0.5,1),
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1,-10,1,-40),
+			Position = UDim2.new(0.5,0,1,-5),
+			Parent = holder
+		}
+	)
+	--
+	local buttons = utility.new(
+		"Frame",
+		{
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1,0,0,25),
+			Position = UDim2.new(0,0,0,0),
+			Parent = holder
+		}
+	)
+	-- 5
+	utility.new(
+		"UIListLayout",
+		{
+			FillDirection = "Horizontal",
+			Parent = buttons
+		}
+	)
+	-- // window tbl
+	window = {
+		["screen"] = screen,
+		["mainframe"] = mainframe,
+		["top"] = top,
+		["title"] = title,
+		["holder"] = holder,
+		["tabs"] = tabs,
+		["buttons"] = buttons,
+		["color"] = color
+	}
 	-- // metatable indexing + return
 	setmetatable(window, library)
 	return window
 end
+--
+function library:page(props)
+	-- // properties
+	local name = props.name or props.Name or props.pageName or props.PageName or props.pagename or props.Pagename or props.title or props.Title or "new page"
+	-- // variables
+	local page = {}
+	-- // main
+	local size = 1
+	local ammount = 1
+	--
+	for ind,val in pairs(self.buttons:GetChildren()) do
+		if val.ClassName == "Frame" then
+			ammount = ammount+1
+		end
+	end
+	--
+	for i,v in pairs(self.buttons:GetChildren()) do
+		if v.ClassName == "Frame" then
+			v.Size = UDim2.new(1/ammount,0,1,0)
+		end
+	end
+	--
+	local frame = utility.new(
+		"Frame",
+		{
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1,0,1,0),
+			Position = UDim2.new(0,0,0,0),
+			Parent = self.tabs,
+			Visible = false
+		}
+	)
+	--
+	local tabbutton = utility.new(
+		"Frame",
+		{
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1/ammount,0,1,0),
+			Parent = self.buttons
+		}
+	)
+	--
+	local title = utility.new(
+		"TextLabel",
+		{
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1,0,1,0),
+			Position = UDim2.new(0,0,0,0),
+			Font = "Ubuntu",
+			Text = name,
+			TextColor3 = Color3.fromRGB(175, 175, 175),
+			TextSize = 13,
+			TextStrokeTransparency = 0.5,
+			Parent = tabbutton
+		}
+	)
+	--
+	local outline = utility.new(
+		"Frame",
+		{
+			AnchorPoint = Vector2.new(0.5,1),
+			BackgroundColor3 = self.color,
+			BorderColor3 = Color3.fromRGB(0,0,0),
+			BorderSizePixel = 0,
+			Size = UDim2.new(0,0,0,2),
+			Position = UDim2.new(0.5,0,1,0),
+			Parent = tabbutton
+		}
+	)
+	--
+	local button = utility.new(
+		"TextButton",
+		{
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1,0,1,0),
+			Position = UDim2.new(0,0,0,0),
+			Text = "",
+			Parent = tabbutton
+		}
+	)
+	--
+	local value = utility.new(
+		"BoolValue",
+		{
+			Parent = tabbutton
+		}
+	)
+	--
+	tabbutton.MouseEnter:Connect(function()
+		if frame.Visible == false then
+			ts:Create(title, TweenInfo.new(0.25,Enum.EasingStyle.Quad,Enum.EasingDirection.Out), {TextColor3 = self.color}):Play()
+		end
+		outline:TweenSize(UDim2.new(0,title.TextBounds.X+40,0,2),Enum.EasingDirection.Out,Enum.EasingStyle.Quad,0.25,true)
+	end)
+	--
+	tabbutton.MouseLeave:Connect(function()
+		if frame.Visible == false then
+			ts:Create(title, TweenInfo.new(0.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(175,175,175)}):Play()
+		end
+		outline:TweenSize(UDim2.new(0,0,0,2),Enum.EasingDirection.In,Enum.EasingStyle.Quad,0.25,true)
+	end)
+	--
+	button.MouseButton1Down:Connect(function()
+		if frame.Visible == true then
+			frame.Visible = false
+			value.Value = false
+			ts:Create(title, TweenInfo.new(0.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(175,175,175)}):Play()
+		else
+			for i,v in pairs(self.tabs:GetChildren()) do
+				if v.ClassName == "Frame" and v.Visible == true then
+					v.Visible = false
+				end
+			end
+			for i,v in pairs(self.buttons:GetChildren()) do
+				if v.ClassName == "Frame" and v.Value.Value == true then
+					ts:Create(v:FindFirstChildOfClass("TextLabel"), TweenInfo.new(0.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In), {TextColor3 = Color3.fromRGB(175,175,175)}):Play()
+				end
+			end
+			frame.Visible = true
+			value.Value = true
+			ts:Create(title, TweenInfo.new(0.25,Enum.EasingStyle.Quad,Enum.EasingDirection.Out), {TextColor3 = self.color}):Play()
+		end
+	end)
+	-- // page tbl
+	page = {
+		["page"] = frame,
+		["window"] = self,
+		["tabbutton"] = tabbutton,
+		["title"] = title,
+		["button"] = button
+	}
+	-- // metatable indexing + return
+	setmetatable(page, pages)
+	return page
+end
+--
+function pages:section(props)
+	-- // properties
+	local name = props.name or props.Name or props.pageName or props.PageName or props.pagename or props.Pagename or props.title or props.Title or "new page"
+	local sectiontype = props.sectiontype or props.Sectiontype or props.SectionType or props.sectionType or props.sidetype or props.Sidetype or props.SideType or props.sideType or props.side or props.Side or "left"
+	sectiontype = sectiontype:lower()
+	--
+	local size = UDim2.new(0,0,0,0)
+	local position = UDim2.new(0,0,0,0)
+	local anchor = Vector2.new(0,0)
+	--
+	if sectiontype == "left" then
+		size = UDim2.new(0.5,-5,1,0)
+		position = UDim2.new(0,0,0,0)
+	elseif sectiontype == "right" then
+		size = UDim2.new(0.5,-5,1,0)
+		position = UDim2.new(1,0,0,0)
+		anchor = Vector2.new(1,0)
+	else
+		size = UDim2.new(1,0,1,0)
+		position = UDim2.new(0,0,0,0)
+	end
+	-- // variables
+	local section = {}
+	-- // main
+	local frame = utility.new(
+		"Frame",
+		{
+			AnchorPoint = anchor,
+			BackgroundColor3 = Color3.fromRGB(22,19,23),
+			BorderColor3 = Color3.fromRGB(10, 6, 10),
+			BorderMode = "Inset",
+			BorderSizePixel = 1,
+			Size = size,
+			Position = position,
+			Parent = self.page
+		}
+	)
+	--
+	local title = utility.new(
+		"TextLabel",
+		{
+			AnchorPoint = Vector2.new(0.5,0.5),
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1,-20,0.05,0),
+			Position = UDim2.new(0.5,0,0,0),
+			Font = "Ubuntu",
+			Text = name,
+			TextColor3 = Color3.fromRGB(230,230,230),
+			TextSize = 10,
+			TextStrokeTransparency = 0.5,
+			TextXAlignment = "Left",
+			Parent = frame
+		}
+	)
+	-- // page tbl
+	section = {
+		
+	}
+	-- // metatable indexing + return
+	setmetatable(section, sections)
+	return section
+end
 -- // init
-library:new({name = "Xenon"})
+local xenon = library:new({name = "Xenon"})
+--
+local aimbot = xenon:page({name = "aimbot"})
+local sfasdf = xenon:page({name = "123"})
+local aaaasd = xenon:page({name = "safaxa"})
+local ccc = xenon:page({name = "2324fs"})
+--
+local hgfg = ccc:section({name = "hello"})
+local xd = ccc:section({name = "new section",side = "right"})
+local asrweqe = aimbot:section({name = "hi man",side = "full"})
+wait(25)
+xenon.screen:Remove()
